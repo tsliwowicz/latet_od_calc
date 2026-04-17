@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>מחשבון זכויות מילואים — אב־טיפוס עיצובי</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Heebo', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              50:  '#f0f6ff',
+              100: '#dbeaff',
+              200: '#bcd7ff',
+              400: '#6a9bff',
+              600: '#2e5edb',
+              700: '#2149b0',
+              800: '#1a3988',
+              900: '#162e6b',
+            },
+          },
+          boxShadow: {
+            card: '0 2px 10px -3px rgb(0 0 0 / 0.06), 0 4px 20px -5px rgb(0 0 0 / 0.05)',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    html, body { font-family: 'Heebo', system-ui, sans-serif; }
+    body { background: linear-gradient(180deg,#f8fafc 0%,#f1f5f9 100%); min-height: 100vh; }
+
+    /* Hide spinner on number inputs */
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    .fade-enter { opacity: 0; transform: translateY(6px); }
+    .fade-enter-active { opacity: 1; transform: none; transition: opacity .25s ease, transform .25s ease; }
+
+    [x-cloak] { display: none !important; }
+
+    /* Pretty scrollbar in overflow panels */
+    .pretty-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+    .pretty-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
+</head>
+
+<body class="text-slate-800">
+
+<!-- =================== HEADER =================== -->
+<header class="bg-gradient-to-l from-brand-900 via-brand-800 to-brand-700 text-white">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div>
+        <div class="flex items-center gap-3">
+          <!-- badge icon -->
+          <svg class="w-8 h-8 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+          <h1 class="text-2xl sm:text-3xl font-bold leading-tight">מחשבון זכויות מילואים</h1>
+        </div>
+        <p class="mt-2 text-brand-100 max-w-2xl">
+          בדיקה מהירה האם תגמול המילואים ששולם לך מלא ונכון, על פי חוק הביטוח הלאומי והחלטת ממשלה 2540.
+        </p>
+      </div>
+
+      <div class="bg-amber-300/20 border border-amber-300/40 rounded-xl px-3 py-2 text-xs text-amber-100 max-w-sm">
+        <strong class="block text-amber-200">זהו אב־טיפוס עיצובי</strong>
+        <span>החישוב המלא והנתונים עדיין בפיתוח. השתמש לבדיקה ראשונית בלבד — לא מהווה ייעוץ משפטי.</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- =================== APP =================== -->
+<main x-data="calculator" x-cloak class="max-w-5xl mx-auto px-4 sm:px-6 -mt-6">
+
+  <!-- Progress indicator -->
+  <nav class="bg-white rounded-2xl shadow-card border border-slate-200 px-2 sm:px-4 py-3 mb-6 overflow-x-auto pretty-scroll">
+    <ol class="flex items-center gap-1 sm:gap-2 min-w-max">
+      <template x-for="(s, i) in steps" :key="i">
+        <li class="flex items-center">
+          <button
+            type="button"
+            @click="goTo(i)"
+            :disabled="i > maxVisited"
+            :class="[
+              'flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition',
+              i === step ? 'bg-brand-700 text-white' :
+              i < step ? 'bg-brand-50 text-brand-800 hover:bg-brand-100' :
+              i <= maxVisited ? 'text-slate-600 hover:bg-slate-50' :
+              'text-slate-400 cursor-not-allowed'
+            ]"
+          >
+            <span
+              :class="[
+                'flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold',
+                i === step ? 'bg-white text-brand-700' :
+                i < step ? 'bg-brand-600 text-white' :
+                'bg-slate-200 text-slate-500'
+              ]"
+              x-text="i < step ? '✓' : (i+1)"
+            ></span>
+            <span class="hidden sm:inline whitespace-nowrap" x-text="s"></span>
+          </button>
+          <svg x-show="i < steps.length - 1" class="w-4 h-4 text-slate-300 mx-0.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </li>
+      </template>
+    </ol>
+  </nav>
+
+  <!-- ================ STEP 0: INTRO ================ -->
+  <section x-show="step === 0" x-transition.opacity class="bg-white rounded-2xl shadow-card border border-slate-200 p-6 sm:p-10">
+    <h2 class="text-2xl font-bold text-slate-900">ברוכים הבאים</h2>
+    <p class="mt-2 text-slate-600 leading-relaxed">
+      המחשבון עוזר לזהות את תגמול המילואים שהיית אמור לקבל לפי חוק הביטוח הלאומי — ומשווה לתשלום שהתקבל בפועל. כל החישוב מתבצע במכשיר שלך בלבד. שום נתון לא נשלח לשרת.
+    </p>
+
+    <div class="grid sm:grid-cols-3 gap-4 mt-8">
+      <div class="p-4 rounded-xl bg-brand-50 border border-brand-100">
+        <div class="flex items-center gap-2 text-brand-800 font-semibold"><span>⏱️</span><span>כ־5 דקות</span></div>
+        <p class="mt-1 text-sm text-slate-600">אסיפת נתונים מתלושים + אישור ימי מילואים.</p>
+      </div>
+      <div class="p-4 rounded-xl bg-brand-50 border border-brand-100">
+        <div class="flex items-center gap-2 text-brand-800 font-semibold"><span>🔒</span><span>פרטיות מלאה</span></div>
+        <p class="mt-1 text-sm text-slate-600">הכל מקומי בדפדפן. אין העלאה לאינטרנט.</p>
+      </div>
+      <div class="p-4 rounded-xl bg-brand-50 border border-brand-100">
+        <div class="flex items-center gap-2 text-brand-800 font-semibold"><span>📎</span><span>הפניות לחוק</span></div>
+        <p class="mt-1 text-sm text-slate-600">כל תוצאה כוללת סעיף חוק רלוונטי.</p>
+      </div>
+    </div>
+
+    <div class="mt-8 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900">
+      <strong>חשוב:</strong> המחשבון מציג חישוב משפטי־מתמטי בלבד. הוא אינו מחליף ייעוץ עם רואה חשבון או מייצג מול ביטוח לאומי.
+    </div>
+
+    <div class="mt-8 flex justify-start">
+      <button type="button" @click="next" class="bg-brand-700 hover:bg-brand-800 text-white font-semibold px-6 py-3 rounded-xl shadow-sm inline-flex items-center gap-2">
+        <span>התחל</span>
+        <svg class="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ================ STEP 1: STATUS ================ -->
+  <section x-show="step === 1" x-transition.opacity class="bg-white rounded-2xl shadow-card border border-slate-200 p-6 sm:p-10">
+    <h2 class="text-2xl font-bold text-slate-900">איזה סוג מבקש אתה?</h2>
+    <p class="mt-1 text-slate-600">הסטטוס שלך <strong>בסמוך לפני</strong> תחילת שירות המילואים. בוחר את החוק באיזה ענף של סעיף 272 אתה נופל.</p>
+
+    <div class="grid sm:grid-cols-2 gap-3 mt-6">
+      <template x-for="opt in statusOptions" :key="opt.value">
+        <label :class="[
+          'flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition',
+          input.claimant.status === opt.value ? 'border-brand-600 bg-brand-50' : 'border-slate-200 hover:border-slate-300'
+        ]">
+          <input type="radio" class="sr-only" :value="opt.value" x-model="input.claimant.status" />
+          <span class="text-2xl" x-text="opt.icon"></span>
+          <span>
+            <span class="block font-semibold text-slate-900" x-text="opt.label"></span>
+            <span class="block text-sm text-slate-500 mt-0.5" x-text="opt.hint"></span>
+          </span>
+        </label>
+      </template>
+    </div>
+
+    <div class="mt-6 pt-6 border-t border-slate-200 space-y-3">
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" x-model="input.claimant.controllingShareholder" class="rounded text-brand-600" />
+        <span>אני <strong>בעל שליטה</strong> בחברה (מדווח תלוש שכר לעצמי)</span>
+      </label>
+      <p class="text-xs text-slate-500 rtl:pr-6 ltr:pl-6">רלוונטי לס' 270 — משיכות בעלים ודיבידנדים לא נחשבים לבסיס תגמול; התראה תוצג בהתאם.</p>
+    </div>
+
+    <div class="mt-6">
+      <label class="text-sm font-semibold text-slate-700">מערך היחידה (למענקי החלטה 2540):</label>
+      <div class="mt-2 flex gap-2 flex-wrap">
+        <template x-for="arr in unitArrays" :key="arr.value">
+          <button type="button"
+            @click="input.claimant.unitArray = arr.value"
+            :class="[
+              'px-4 py-2 rounded-full text-sm border transition',
+              input.claimant.unitArray === arr.value ? 'border-brand-600 bg-brand-600 text-white' : 'border-slate-300 hover:border-brand-400 bg-white'
+            ]"
+            x-text="arr.label"></button>
+        </template>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================ STEP 2: SERVICE PERIODS ================ -->
+  <section x-show="step === 2" x-transition.opacity class="bg-white rounded-2xl shadow-card border border-slate-200 p-6 sm:p-10">
+    <h2 class="text-2xl font-bold text-slate-900">תקופות השירות</h2>
+    <p class="mt-1 text-slate-600">הזן כל תקופת מילואים בנפרד. כלל 7 הימים (ס' 271) מופעל על כל תקופה בנפרד.</p>
+
+    <div class="mt-6 space-y-4">
+      <template x-for="(p, i) in input.service.periods" :key="i">
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-slate-800">תקופה <span x-text="i+1"></span></h3>
+            <button type="button" @click="removePeriod(i)" x-show="input.service.periods.length > 1"
+              class="text-red-600 hover:text-red-800 text-sm">הסר</button>
+          </div>
+
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <label class="block">
+              <span class="text-xs font-semibold text-slate-600">תחילה</span>
+              <input type="date" x-model="p.start" class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+            </label>
+            <label class="block">
+              <span class="text-xs font-semibold text-slate-600">סיום</span>
+              <input type="date" x-model="p.end" class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+            </label>
+            <label class="block">
+              <span class="text-xs font-semibold text-slate-600">סוג הגיוס</span>
+              <select x-model="p.kind" class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500">
+                <option value="regular">רגיל</option>
+                <option value="order_8">צו 8</option>
+                <option value="tevam">תע"מ (אחרי תום צו 8)</option>
+              </select>
+            </label>
+            <label class="flex items-end pb-1">
+              <div class="flex items-center gap-2 text-sm">
+                <input type="checkbox" x-model="p.halfDay" class="rounded text-brand-600" />
+                <span>שירות חצי־יומי (חצי תגמול)</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="mt-3 text-xs text-slate-500 flex gap-3 flex-wrap" x-show="p.start && p.end">
+            <span>סה"כ ימים: <strong x-text="daysInPeriod(p)"></strong></span>
+            <span x-show="p.halfDay" class="text-amber-700">• חצי־יומי</span>
+            <span class="text-brand-700">• לאחר כלל ×1.4: <strong x-text="paidDaysForPeriod(p).toFixed(1)"></strong></span>
+          </div>
+        </div>
+      </template>
+
+      <button type="button" @click="addPeriod"
+        class="w-full border-2 border-dashed border-slate-300 hover:border-brand-500 hover:bg-brand-50 rounded-xl py-3 text-slate-600 hover:text-brand-700 font-semibold transition">
+        + הוסף תקופה נוספת
+      </button>
+    </div>
+
+    <div class="mt-4 p-3 bg-brand-50 rounded-xl border border-brand-100 text-sm text-brand-900 flex items-center justify-between gap-4 flex-wrap">
+      <span>סה"כ ימים ששירתת: <strong x-text="totalDays()"></strong></span>
+      <span>סה"כ ימים משולמים (אחרי כלל 7 ו־×1.4): <strong x-text="totalPaidDays().toFixed(1)"></strong></span>
+    </div>
+  </section>
+
+  <!-- ================ STEP 3: INCOME ================ -->
+  <section x-show="step === 3" x-transition.opacity class="bg-white rounded-2xl shadow-card border border-slate-200 p-6 sm:p-10">
+    <h2 class="text-2xl font-bold text-slate-900">פרטי הכנסה</h2>
+    <p class="mt-1 text-slate-600">3 החודשים הקלנדריים שקדמו לתחילת המילואים. ערכי ברוטו לפי תלוש שכר.</p>
+
+    <!-- Employee section -->
+    <div x-show="needsEmployeeIncome" class="mt-6">
+      <h3 class="font-semibold text-slate-800 mb-3">הכנסת שכיר (רבע השנה):</h3>
+      <div class="grid sm:grid-cols-3 gap-3">
+        <template x-for="m in quarterMonths" :key="m">
+          <label class="block">
+            <span class="text-xs font-semibold text-slate-600" x-text="m.labelHe"></span>
+            <div class="mt-1 relative">
+              <input type="number" min="0" step="1" x-model.number="input.income.byMonth[m.ym]" placeholder="0"
+                class="w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 pl-8" />
+              <span class="absolute top-1/2 -translate-y-1/2 text-slate-400 text-sm" style="left:0.6rem">₪</span>
+            </div>
+          </label>
+        </template>
+      </div>
+
+      <button type="button" @click="use3of6 = !use3of6" class="mt-3 text-sm text-brand-700 hover:text-brand-900">
+        <span x-show="!use3of6">לא עבדתי חודש שלם באחד מהחודשים — הפעל כלל "3 מתוך 6"</span>
+        <span x-show="use3of6">חזור לחישוב רגיל</span>
+      </button>
+
+      <template x-if="use3of6">
+        <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+          <p class="text-sm text-amber-900">לפי ס' 273(ב), אם עבדת פחות מ־60 ימים ברבע השנה — תוכל לבחור את 3 החודשים הגבוהים מתוך 6 החודשים שקדמו למילואים.</p>
+          <div class="grid sm:grid-cols-3 gap-3 mt-3">
+            <template x-for="m in extraMonths" :key="m">
+              <label class="block">
+                <span class="text-xs font-semibold text-slate-600" x-text="m.labelHe"></span>
+                <input type="number" min="0" step="1" x-model.number="input.income.byMonth[m.ym]" placeholder="0"
+                  class="mt-1 w-full rounded-lg border-amber-300 focus:border-amber-500 focus:ring-amber-500" />
+              </label>
+            </template>
+          </div>
+          <p class="mt-2 text-xs text-amber-800">המחשבון יבחר אוטומטית את 3 הגבוהים.</p>
+        </div>
+      </template>
+    </div>
+
+    <!-- Self-employed section -->
+    <div x-show="needsSelfEmployedIncome" class="mt-8 pt-6" :class="needsEmployeeIncome ? 'border-t border-slate-200' : ''">
+      <h3 class="font-semibold text-slate-800 mb-3">הכנסת עצמאי:</h3>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <label class="block">
+          <span class="text-xs font-semibold text-slate-600">הכנסה שנתית לפי שומה סופית (₪)</span>
+          <input type="number" min="0" step="100" x-model.number="input.claimant.se.finalAssessment" placeholder="0"
+            class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+        </label>
+        <label class="block">
+          <span class="text-xs font-semibold text-slate-600">הכנסה ששימשה בסיס למקדמות (₪)</span>
+          <input type="number" min="0" step="100" x-model.number="input.claimant.se.advanceBasis" placeholder="0"
+            class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+        </label>
+      </div>
+      <p class="text-xs text-slate-500 mt-2">בתקופת חרבות ברזל (1.2.23–31.12.25) בסיס החישוב הוא הגבוה מבין השניים.</p>
+    </div>
+
+    <!-- Unemployment section -->
+    <div x-show="input.claimant.status === 'unemployed_with_benefits'" class="mt-6">
+      <label class="block">
+        <span class="text-xs font-semibold text-slate-600">דמי אבטלה יומיים (₪ ליום)</span>
+        <input type="number" min="0" step="1" x-model.number="input.claimant.dailyUnemployment" placeholder="0"
+          class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+      </label>
+    </div>
+
+    <!-- Pitzui events -->
+    <div class="mt-8 pt-6 border-t border-slate-200">
+      <label class="flex items-center gap-2">
+        <input type="checkbox" x-model="input.income.hasPitzui" class="rounded text-brand-600" />
+        <span class="text-sm"><strong>חל פיצוי שכר</strong> באחד החודשים שבחישוב או אחריו</span>
+      </label>
+      <div x-show="input.income.hasPitzui" class="mt-3 grid sm:grid-cols-2 gap-3">
+        <label class="block">
+          <span class="text-xs font-semibold text-slate-600">תאריך הפיצוי</span>
+          <input type="date" x-model="input.income.pitzui.date" class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+        </label>
+        <label class="block">
+          <span class="text-xs font-semibold text-slate-600">שיעור (%)</span>
+          <input type="number" step="0.1" x-model.number="input.income.pitzui.rate" placeholder="3.5" class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================ STEP 4: PAID ================ -->
+  <section x-show="step === 4" x-transition.opacity class="bg-white rounded-2xl shadow-card border border-slate-200 p-6 sm:p-10">
+    <h2 class="text-2xl font-bold text-slate-900">מה שולם בפועל</h2>
+    <p class="mt-1 text-slate-600">הסכומים שקיבלת בפועל בגין תקופת השירות — מביטוח לאומי ו/או מהמעסיק.</p>
+
+    <div class="grid sm:grid-cols-3 gap-4 mt-6">
+      <label class="block">
+        <span class="text-xs font-semibold text-slate-600">מביטוח לאומי (₪)</span>
+        <input type="number" min="0" step="1" x-model.number="input.paid.byNi" placeholder="0"
+          class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+      </label>
+      <label class="block">
+        <span class="text-xs font-semibold text-slate-600">מהמעסיק — מקדמה (₪)</span>
+        <input type="number" min="0" step="1" x-model.number="input.paid.byEmployerAdvance" placeholder="0"
+          class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+      </label>
+      <label class="block">
+        <span class="text-xs font-semibold text-slate-600">מהמעסיק — אחר (₪)</span>
+        <input type="number" min="0" step="1" x-model.number="input.paid.byEmployerOther" placeholder="0"
+          class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+      </label>
+    </div>
+
+    <div class="mt-6 space-y-3">
+      <label class="flex items-center gap-2">
+        <input type="checkbox" x-model="input.paid.niRejected" class="rounded text-brand-600" />
+        <span class="text-sm">התביעה האישית שלי לביטוח לאומי <strong>נדחתה</strong></span>
+      </label>
+      <label class="flex items-center gap-2">
+        <input type="checkbox" x-model="input.paid.dualEmployerIssue" class="rounded text-brand-600" />
+        <span class="text-sm">יש לי <strong>יותר ממעסיק אחד</strong> ושניהם שילמו תגמול</span>
+      </label>
+    </div>
+  </section>
+
+  <!-- ================ STEP 5: 2540 GRANTS ================ -->
+  <section x-show="step === 5" x-transition.opacity class="bg-white rounded-2xl shadow-card border border-slate-200 p-6 sm:p-10">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">מענקי החלטת ממשלה 2540</h2>
+        <p class="mt-1 text-slate-600">אופציונלי — נתונים נוספים שמזכים במענקי משרד הביטחון (בנוסף לתגמול מביטוח לאומי).</p>
+      </div>
+      <button type="button" @click="next" class="text-sm text-slate-500 hover:text-slate-700 underline">דלג על שלב זה</button>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-4 mt-6">
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+        <h3 class="font-semibold text-slate-800 mb-3">משפחה</h3>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" x-model="input.claimant.hasChildUnder14" class="rounded text-brand-600" />
+            <span>יש לי ילד עד גיל 14</span>
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" x-model="input.claimant.hasChildUnder18" class="rounded text-brand-600" />
+            <span>יש לי ילד עד גיל 18</span>
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" x-model="input.claimant.hasSpecialNeedsChild" class="rounded text-brand-600" />
+            <span>ילד עם צרכים מיוחדים / זכאי גמלת ילד נכה</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+        <h3 class="font-semibold text-slate-800 mb-3">בן/בת זוג</h3>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" x-model="input.claimant.hasPartner" class="rounded text-brand-600" />
+            <span>יש לי בן/בת זוג</span>
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" x-model="input.claimant.partnerOnUnpaidLeave" class="rounded text-brand-600" />
+            <span>בן/בת הזוג יצא/ה לחל"ת בתקופת השירות (≥ 21 יום)</span>
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" x-model="input.claimant.movedDuringService" class="rounded text-brand-600" />
+            <span>עברתי דירה בתקופת השירות</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 bg-brand-50 border border-brand-200 rounded-xl p-4 text-sm text-brand-900">
+      <strong>ראיתי שיש לך</strong> <span x-text="totalOrder8Days()"></span> ימי צו 8 במערך <span class="font-semibold" x-text="unitArrayLabel()"></span>. זה מציב אותך ברמות הזכאות הבאות: <span x-text="zkautSummary()"></span>.
+    </div>
+  </section>
+
+  <!-- ================ STEP 6: RESULTS ================ -->
+  <section x-show="step === 6" x-transition.opacity class="space-y-6">
+
+    <!-- Headline numbers -->
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5">
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">תגמול צפוי לפי חוק</div>
+        <div class="text-3xl font-bold text-slate-900 mt-2" x-text="fmtIls(results.expected)"></div>
+        <div class="text-sm text-slate-500 mt-1">
+          <span x-text="results.paidDays.toFixed(1)"></span> ימים משולמים × <span x-text="fmtIls(results.dailyRate)"></span> ליום
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5">
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">שולם בפועל</div>
+        <div class="text-3xl font-bold text-slate-900 mt-2" x-text="fmtIls(results.paidTotal)"></div>
+        <div class="text-sm text-slate-500 mt-1">כולל ביטוח לאומי והמעסיק</div>
+      </div>
+      <div
+        :class="[
+          'rounded-2xl shadow-card border p-5',
+          results.gap > 0 ? 'bg-emerald-50 border-emerald-300' :
+          results.gap < 0 ? 'bg-red-50 border-red-300' :
+          'bg-slate-50 border-slate-300'
+        ]">
+        <div
+          :class="['text-xs font-semibold uppercase tracking-wide',
+            results.gap > 0 ? 'text-emerald-800' : results.gap < 0 ? 'text-red-800' : 'text-slate-600']"
+          x-text="results.gap > 0 ? 'מגיע לך' : results.gap < 0 ? 'שולם ביתר' : 'אין פער'"
+        ></div>
+        <div class="text-3xl font-bold mt-2"
+          :class="results.gap > 0 ? 'text-emerald-900' : results.gap < 0 ? 'text-red-900' : 'text-slate-900'"
+          x-text="fmtIls(Math.abs(results.gap))"></div>
+        <div class="text-sm mt-1"
+          :class="results.gap > 0 ? 'text-emerald-700' : results.gap < 0 ? 'text-red-700' : 'text-slate-500'">
+          <span x-show="results.gap > 0">יש מקום לברר עם ביטוח לאומי</span>
+          <span x-show="results.gap < 0">ייתכן שתידרש להחזיר</span>
+          <span x-show="results.gap === 0">התשלום תואם את החישוב</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Breakdown -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-200">
+      <button type="button" @click="expanded.breakdown = !expanded.breakdown"
+        class="w-full flex items-center justify-between px-5 sm:px-6 py-4 text-right">
+        <h3 class="font-bold text-slate-900 flex items-center gap-2">
+          <span>🔎</span><span>פירוט החישוב</span>
+        </h3>
+        <svg :class="{'rotate-180': expanded.breakdown}" class="w-5 h-5 text-slate-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+
+      <div x-show="expanded.breakdown" x-collapse class="border-t border-slate-200 px-5 sm:px-6 py-5 space-y-4">
+
+        <!-- Rule used -->
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-800 flex items-center justify-center font-bold text-sm flex-shrink-0">1</div>
+          <div>
+            <div class="font-semibold text-slate-900">בסיס השכר</div>
+            <div class="text-sm text-slate-600">חושב לפי <strong x-text="results.ruleUsed"></strong></div>
+            <div class="text-sm text-slate-500 mt-1">סכום ההכנסה ברבע השנה: <strong x-text="fmtIls(results.quarterSum)"></strong> ÷ 90 = <strong x-text="fmtIls(results.rawDaily)"></strong> ליום</div>
+          </div>
+        </div>
+
+        <!-- Clamp -->
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-800 flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
+          <div>
+            <div class="font-semibold text-slate-900">הגבלות מינימום/מקסימום</div>
+            <div class="text-sm text-slate-600">
+              <span x-show="results.clampedBy === 'none'">הסכום היומי (<strong x-text="fmtIls(results.rawDaily)"></strong>) בתוך הטווח המותר, ללא הגבלה.</span>
+              <span x-show="results.clampedBy === 'min'" class="text-amber-700">הסכום היומי היה נמוך מהתגמול המזערי. הוגדל ל־<strong x-text="fmtIls(results.dailyRate)"></strong>.</span>
+              <span x-show="results.clampedBy === 'max'" class="text-amber-700">הסכום היומי חרג מהתגמול המרבי. הוגבל ל־<strong x-text="fmtIls(results.dailyRate)"></strong>.</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">2026: מינימום 328.76 ₪/יום, מקסימום 1,730.33 ₪/יום.</div>
+          </div>
+        </div>
+
+        <!-- §271 multiplier -->
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-800 flex items-center justify-center font-bold text-sm flex-shrink-0">3</div>
+          <div>
+            <div class="font-semibold text-slate-900">כלל 7 הימים (ס' 271)</div>
+            <div class="text-sm text-slate-600">
+              סה"כ שירתת <strong x-text="totalDays()"></strong> ימים. לאחר הכלל — <strong x-text="totalPaidDays().toFixed(1)"></strong> ימים משולמים.
+            </div>
+            <div class="text-xs text-slate-500 mt-1">שארית של 6 מצטברת ליום נוסף; שארית של 1–5 מוכפלת ב־1.4.</div>
+          </div>
+        </div>
+
+        <!-- Total -->
+        <div class="flex items-start gap-3 bg-brand-50 rounded-xl p-3 border border-brand-100">
+          <div class="w-8 h-8 rounded-full bg-brand-700 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">=</div>
+          <div>
+            <div class="font-bold text-brand-900">תגמול כולל</div>
+            <div class="text-sm text-brand-800">
+              <strong x-text="fmtIls(results.dailyRate)"></strong> × <strong x-text="results.paidDays.toFixed(1)"></strong> = <strong x-text="fmtIls(results.expected)"></strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flags -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 sm:p-6" x-show="results.flags.length > 0">
+      <h3 class="font-bold text-slate-900 flex items-center gap-2 mb-4">
+        <span>⚠️</span><span>דברים שכדאי לבדוק</span>
+        <span class="text-xs font-normal text-slate-500">(<span x-text="results.flags.length"></span>)</span>
+      </h3>
+      <ul class="space-y-3">
+        <template x-for="f in results.flags" :key="f.code">
+          <li
+            :class="[
+              'flex items-start gap-3 p-3 rounded-xl border',
+              f.severity === 'high' ? 'bg-red-50 border-red-200' :
+              f.severity === 'warning' ? 'bg-amber-50 border-amber-200' :
+              'bg-blue-50 border-blue-200'
+            ]">
+            <span
+              :class="[
+                'flex items-center justify-center w-7 h-7 rounded-full text-white font-bold text-sm flex-shrink-0',
+                f.severity === 'high' ? 'bg-red-500' :
+                f.severity === 'warning' ? 'bg-amber-500' :
+                'bg-blue-500'
+              ]"
+              x-text="f.severity === 'high' ? '!' : f.severity === 'warning' ? '!' : 'i'"
+            ></span>
+            <div>
+              <div class="font-semibold text-slate-900" x-text="f.title"></div>
+              <div class="text-sm text-slate-700 mt-1" x-text="f.message"></div>
+              <div class="text-xs text-slate-500 mt-1">סעיף <span x-text="f.section"></span></div>
+            </div>
+          </li>
+        </template>
+      </ul>
+    </div>
+
+    <!-- 2540 Grants -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 sm:p-6" x-show="results.grants.length > 0">
+      <h3 class="font-bold text-slate-900 flex items-center gap-2 mb-1">
+        <span>🎖️</span><span>מענקי החלטה 2540 שמגיעים לך</span>
+      </h3>
+      <p class="text-xs text-slate-500 mb-4">מעבר לתגמול הרגיל מביטוח לאומי. משולמים על ידי מופת לחשבון הבנק הרשום בצה"ל.</p>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <template x-for="g in results.grants" :key="g.code">
+          <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50">
+            <div class="flex items-start justify-between gap-2">
+              <div class="font-semibold text-emerald-900" x-text="g.title"></div>
+              <div class="font-bold text-emerald-800 whitespace-nowrap" x-text="g.amountStr"></div>
+            </div>
+            <div class="text-xs text-emerald-700 mt-2" x-text="g.note"></div>
+          </div>
+        </template>
+      </div>
+      <div class="text-right mt-3 text-sm font-semibold text-emerald-900">
+        סה"כ מענקים: <span x-text="fmtIls(results.grantsTotal)"></span>
+      </div>
+    </div>
+
+    <!-- Citations -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 sm:p-6">
+      <h3 class="font-bold text-slate-900 flex items-center gap-2 mb-3">
+        <span>📚</span><span>מקורות בחוק</span>
+      </h3>
+      <div class="grid sm:grid-cols-2 gap-2">
+        <template x-for="c in results.citations" :key="c.section">
+          <a :href="c.url" target="_blank" rel="noopener"
+            class="flex items-center gap-2 p-3 rounded-lg border border-slate-200 hover:border-brand-400 hover:bg-brand-50 text-sm">
+            <span class="text-brand-700 font-mono font-bold" x-text="c.section"></span>
+            <span class="text-slate-600 truncate" x-text="c.title"></span>
+            <svg class="w-4 h-4 text-slate-400 me-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          </a>
+        </template>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center justify-between flex-wrap gap-3 pt-2">
+      <button type="button" @click="reset" class="text-slate-600 hover:text-slate-900 inline-flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.582m0 0A8.003 8.003 0 0 1 4.582 15"/></svg>
+        <span>התחל מחדש</span>
+      </button>
+
+      <div class="flex gap-2 flex-wrap">
+        <button type="button" @click="downloadJson" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0-3-3m3 3 3-3M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          <span>הורד JSON</span>
+        </button>
+        <button type="button" @click="window.print()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2m2 4h6a2 2 0 0 0 2-2v-4H7v4a2 2 0 0 0 2 2Zm8-12V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4h10Z"/></svg>
+          <span>הדפס דו"ח</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================ NAV ================ -->
+  <div class="flex items-center justify-between mt-6 mb-10" x-show="step > 0 && step < 6">
+    <button type="button" @click="prev" class="inline-flex items-center gap-1 px-4 py-2 text-slate-600 hover:text-slate-900">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      <span>הקודם</span>
+    </button>
+
+    <button type="button" @click="next" class="inline-flex items-center gap-2 px-6 py-3 bg-brand-700 hover:bg-brand-800 text-white font-semibold rounded-xl shadow-sm">
+      <span x-text="step === 5 ? 'חשב תוצאות' : 'הבא'"></span>
+      <svg class="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+</main>
+
+<!-- =================== FOOTER =================== -->
+<footer class="max-w-5xl mx-auto px-4 sm:px-6 pb-10 text-center text-xs text-slate-500">
+  <div class="border-t border-slate-200 pt-6 space-y-1">
+    <div>אב־טיפוס עיצובי — לא מהווה ייעוץ משפטי או פיננסי</div>
+    <div>
+      מבוסס על פרק י"ב לחוק הביטוח הלאומי ועל מדיניות אגף המילואים לשנת 2025 (החלטת ממשלה 2540)
+    </div>
+  </div>
+</footer>
+
+<!-- =================== SCRIPTS =================== -->
+<script>
+  // ============ Constants (2026 defaults) ============
+  const CONSTANTS = {
+    2026: {
+      basic: 10382,
+      minDaily: 328.76,
+      maxDaily: 1730.33,
+      monthFloor: 0.68 * 10382,
+    },
+    2025: {
+      basic: 10382,
+      minDaily: 328.76,
+      maxDaily: 1730.33,
+      monthFloor: 0.68 * 10382,
+    },
+  };
+  const CURRENT_YEAR = 2026;
+  const SE_UPLIFT = 1.25;
+
+  // ============ Data model ============
+  function blankInput() {
+    return {
+      claimant: {
+        status: 'employee',
+        controllingShareholder: false,
+        unitArray: 'other',
+        hasChildUnder14: false,
+        hasChildUnder18: false,
+        hasSpecialNeedsChild: false,
+        hasPartner: false,
+        partnerOnUnpaidLeave: false,
+        movedDuringService: false,
+        dailyUnemployment: 0,
+        se: { finalAssessment: 0, advanceBasis: 0 },
+      },
+      service: {
+        periods: [{ start: '', end: '', kind: 'order_8', halfDay: false }],
+      },
+      income: {
+        byMonth: {},
+        hasPitzui: false,
+        pitzui: { date: '', rate: 0 },
+      },
+      paid: {
+        byNi: 0,
+        byEmployerAdvance: 0,
+        byEmployerOther: 0,
+        niRejected: false,
+        dualEmployerIssue: false,
+      },
+    };
+  }
+
+  // ============ Helpers ============
+  const MONTH_NAMES_HE = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+
+  function ymKey(date) {
+    return date.toISOString().slice(0,7);
+  }
+  function labelFromYM(ym) {
+    if (!ym) return '';
+    const [y,m] = ym.split('-').map(Number);
+    return `${MONTH_NAMES_HE[m-1]} ${y}`;
+  }
+  function addMonths(date, n) {
+    const d = new Date(date);
+    d.setMonth(d.getMonth() + n);
+    return d;
+  }
+  function daysBetween(start, end) {
+    if (!start || !end) return 0;
+    const s = new Date(start), e = new Date(end);
+    return Math.max(0, Math.round((e - s) / (1000*60*60*24)) + 1);
+  }
+  function paidDaysFor(n) {
+    if (!n || n <= 0) return 0;
+    const r = n % 7;
+    if (r === 0) return n;
+    if (r === 6) return n + 1;
+    return n + r * 0.4;
+  }
+
+  // ============ Alpine component ============
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('calculator', () => ({
+      step: 0,
+      maxVisited: 0,
+      use3of6: false,
+      expanded: { breakdown: true },
+
+      steps: ['ברוכים הבאים','סוג מבקש','תקופות שירות','הכנסה','מה שולם','מענקי 2540','תוצאות'],
+
+      statusOptions: [
+        { value: 'employee',                         icon: '👔', label: 'שכיר',                   hint: 'שכר חודשי או לפי שעה, עם תלוש שכר' },
+        { value: 'self_employed',                    icon: '💼', label: 'עצמאי',                   hint: 'עוסק מורשה / פטור / חברה בע"מ' },
+        { value: 'both',                             icon: '🔀', label: 'שכיר + עצמאי',            hint: 'ההכנסות מחוברות לפי תקנה §4' },
+        { value: 'unemployed_with_benefits',         icon: '📄', label: 'מובטל זכאי לדמי אבטלה',   hint: 'יש רצפה לתגמול (ס\' 272(ג))' },
+        { value: 'student_or_none',                  icon: '🎓', label: 'סטודנט / לא עבד',         hint: 'תגמול מזערי בלבד' },
+        { value: 'released_from_permanent_service',  icon: '🪖', label: 'משוחרר מקבע',             hint: 'ס\' 274ג — נחשב כאילו היית מועסק בקבע' },
+        { value: 'pgiya_recipient',                  icon: '🩹', label: 'מקבל דמי פגיעה',          hint: 'ס\' 274א — אפשר להשתמש ברבע שלפני הפגיעה' },
+      ],
+
+      unitArrays: [
+        { value: 'combat', label: 'מערך לוחם' },
+        { value: 'hagmar', label: 'מערך ההגמ"ר' },
+        { value: 'other',  label: 'יתר היחידות' },
+      ],
+
+      input: blankInput(),
+      results: defaultResults(),
+
+      // ---------- Navigation ----------
+      next() {
+        if (this.step === 5) { this.compute(); }
+        this.step = Math.min(this.step + 1, this.steps.length - 1);
+        this.maxVisited = Math.max(this.maxVisited, this.step);
+        window.scrollTo({top:0, behavior:'smooth'});
+      },
+      prev() { this.step = Math.max(0, this.step - 1); window.scrollTo({top:0, behavior:'smooth'}); },
+      goTo(i) {
+        if (i > this.maxVisited) return;
+        this.step = i;
+        window.scrollTo({top:0, behavior:'smooth'});
+      },
+      reset() {
+        this.input = blankInput();
+        this.results = defaultResults();
+        this.step = 0;
+        this.maxVisited = 0;
+        this.use3of6 = false;
+      },
+
+      // ---------- Derived ----------
+      get needsEmployeeIncome() {
+        return ['employee','both','released_from_permanent_service'].includes(this.input.claimant.status);
+      },
+      get needsSelfEmployedIncome() {
+        return ['self_employed','both'].includes(this.input.claimant.status);
+      },
+      get quarterMonths() {
+        const startISO = this.input.service.periods[0]?.start;
+        if (!startISO) return [1,2,3].map(i => ({ ym: `2025-0${i}`, labelHe: `חודש ${i} לפני מילואים (טרם הוזן תאריך)` }));
+        const startDate = new Date(startISO);
+        startDate.setDate(1);
+        const months = [];
+        for (let i = 1; i <= 3; i++) {
+          const d = addMonths(startDate, -i);
+          const ym = ymKey(d);
+          months.push({ ym, labelHe: labelFromYM(ym) });
+        }
+        return months.reverse();
+      },
+      get extraMonths() {
+        const startISO = this.input.service.periods[0]?.start;
+        if (!startISO) return [];
+        const startDate = new Date(startISO);
+        startDate.setDate(1);
+        const months = [];
+        for (let i = 4; i <= 6; i++) {
+          const d = addMonths(startDate, -i);
+          const ym = ymKey(d);
+          months.push({ ym, labelHe: labelFromYM(ym) });
+        }
+        return months.reverse();
+      },
+
+      // ---------- Service period helpers ----------
+      addPeriod() {
+        this.input.service.periods.push({ start: '', end: '', kind: 'order_8', halfDay: false });
+      },
+      removePeriod(i) {
+        this.input.service.periods.splice(i, 1);
+      },
+      daysInPeriod(p) { return daysBetween(p.start, p.end); },
+      paidDaysForPeriod(p) {
+        const d = this.daysInPeriod(p);
+        const paid = paidDaysFor(d);
+        return p.halfDay ? paid * 0.5 : paid;
+      },
+      totalDays() {
+        return this.input.service.periods.reduce((s,p) => s + this.daysInPeriod(p), 0);
+      },
+      totalPaidDays() {
+        return this.input.service.periods.reduce((s,p) => s + this.paidDaysForPeriod(p), 0);
+      },
+      totalOrder8Days() {
+        return this.input.service.periods
+          .filter(p => p.kind === 'order_8' || p.kind === 'tevam')
+          .reduce((s,p) => s + this.daysInPeriod(p), 0);
+      },
+      unitArrayLabel() {
+        return (this.unitArrays.find(u => u.value === this.input.claimant.unitArray) || {}).label || '';
+      },
+      zkautSummary() {
+        const d = this.totalOrder8Days();
+        const tiers = [];
+        if (d >= 30) tiers.push('מענק הוצאות אישיות');
+        if (d >= 40) tiers.push('מענק הוצאות מוגדל');
+        if (d >= 45) tiers.push('מענק כלכלת הבית');
+        if (d >= 60) tiers.push('מענק סף 60 ימים');
+        if (d >= 120) tiers.push('מענקי 120 ימי לוחם');
+        return tiers.length ? tiers.join(', ') : 'אין עדיין';
+      },
+
+      // ---------- Main compute (stub) ----------
+      compute() {
+        const P = CONSTANTS[CURRENT_YEAR];
+        const c = this.input.claimant;
+
+        // Base daily
+        let ruleUsed = 'L§273(א) רבע השנה';
+        let quarterSum = 0;
+        if (this.needsEmployeeIncome) {
+          const months = this.use3of6 ?
+            [...this.quarterMonths, ...this.extraMonths]
+              .map(m => this.input.income.byMonth[m.ym] || 0)
+              .sort((a,b) => b-a).slice(0,3) :
+            this.quarterMonths.map(m => this.input.income.byMonth[m.ym] || 0);
+
+          const flooredMonths = months.map(v => Math.max(v, P.monthFloor));
+          quarterSum = flooredMonths.reduce((s,v) => s + v, 0);
+          ruleUsed = this.use3of6 ? 'L§273(ב) 3 מתוך 6' : 'L§273(א) רבע השנה';
+        }
+        if (this.needsSelfEmployedIncome) {
+          const se = Math.max(c.se.finalAssessment, c.se.advanceBasis);
+          const seMonthly = (se / 12) * SE_UPLIFT;
+          quarterSum += seMonthly * 3;
+          ruleUsed = c.status === 'self_employed' ? 'L§273(א) לעצמאי' : 'L§273(א) + תקנה §4';
+        }
+        if (c.status === 'student_or_none') {
+          ruleUsed = 'L§272(א)(3) מינימום';
+        }
+
+        const rawDaily = quarterSum > 0 ? quarterSum / 90 : 0;
+
+        // Clamp
+        let daily = rawDaily;
+        let clampedBy = 'none';
+        if (daily < P.minDaily) { daily = P.minDaily; clampedBy = 'min'; }
+        else if (daily > P.maxDaily) { daily = P.maxDaily; clampedBy = 'max'; }
+        if (c.status === 'unemployed_with_benefits') {
+          daily = Math.max(daily, c.dailyUnemployment);
+        }
+
+        // Paid days
+        const paidDays = this.totalPaidDays();
+        const expected = daily * paidDays;
+
+        // Already paid
+        const paidTotal = (this.input.paid.byNi||0) + (this.input.paid.byEmployerAdvance||0) + (this.input.paid.byEmployerOther||0);
+        const gap = expected - paidTotal;
+
+        // Flags (heuristics for visual prototype)
+        const flags = [];
+        const monthValues = this.quarterMonths.map(m => this.input.income.byMonth[m.ym] || 0);
+        if (monthValues.some(v => v === 0) && this.needsEmployeeIncome) {
+          flags.push({
+            code:'QUARTER_HAS_ZERO_MONTHS', severity:'warning', section:'273(א)(2)',
+            title:'חודש ללא הכנסה ברבע השנה',
+            message:'באחד מחודשי רבע השנה לא היתה הכנסה — הופעל מינימום של 68% מהסכום הבסיסי כרצפה לאותו חודש.'
+          });
+        }
+        if (clampedBy === 'min') {
+          flags.push({
+            code:'CLAMPED_MIN', severity:'warning', section:'272(ב)',
+            title:'הסכום היומי הוגבל למינימום',
+            message:'החישוב הרגיל יצא נמוך מהתגמול המזערי. ייתכן שמגיע לך להגיש בקשה לבחינת נסיבות חריגות לפי ס\' 273(ג).'
+          });
+        }
+        if (clampedBy === 'max') {
+          flags.push({
+            code:'CLAMPED_MAX', severity:'info', section:'272(ב)',
+            title:'הסכום היומי הוגבל למקסימום',
+            message:'הגבלת הסכום הבסיסי כפול 5 פועלת — זה נורמלי לשכר גבוה.'
+          });
+        }
+        if (c.controllingShareholder) {
+          flags.push({
+            code:'CONTROLLING_SHAREHOLDER_GAP', severity:'warning', section:'270 "הכנסה"',
+            title:'בעל שליטה — ייתכן פער',
+            message:'משיכות בעלים ודיבידנדים אינם נחשבים לבסיס תגמול. אם ההכנסה בפועל גבוהה משמעותית מהתלוש, כדאי לעדכן דיווח בביטוח לאומי.'
+          });
+        }
+        if (this.input.paid.dualEmployerIssue) {
+          flags.push({
+            code:'DUAL_EMPLOYER_DOUBLE_PAY', severity:'high', section:'280',
+            title:'תשלום כפול משני מעסיקים',
+            message:'רק מעסיק אחד אמור לקבל שיפוי מביטוח לאומי. ייתכן שתידרש להשיב את ההפרש. מומלץ להיוועץ במייצג.'
+          });
+        }
+        if (this.input.paid.niRejected) {
+          flags.push({
+            code:'NI_REJECTED', severity:'high', section:'276',
+            title:'התביעה נדחתה',
+            message:'החישוב המוצג הוא "מה היה מגיע לו התקבלה". השתמש בו לצורך ערעור או פניה חוזרת.'
+          });
+        }
+        const newHireRisk = this.input.service.periods[0]?.start && monthValues.every(v => v === 0) && this.needsEmployeeIncome;
+        if (newHireRisk) {
+          flags.push({
+            code:'NEW_EMPLOYEE_NEAR_CALL_UP', severity:'warning', section:'274(א)',
+            title:'עובד חדש לפני הגיוס',
+            message:'כל החודשים ברבע השנה ללא הכנסה — ייתכן שאתה זכאי לעיגון חישוב לפי מקום עבודה קודם (ס\' 274(א)). בדוק מול ביטוח לאומי.'
+          });
+        }
+
+        // Grants (simplified)
+        const grants = [];
+        const days = this.totalOrder8Days();
+        const arr = c.unitArray;
+        const per10 = {
+          combat: { personal: 466, family: 833 },
+          hagmar: { personal: 310, family: 600 },
+          other:  { personal: 266, family: 500 },
+        }[arr] || { personal: 266, family: 500 };
+
+        if (days >= 40) {
+          const eligibleDays = Math.max(0, days - 30);
+          const chunks = Math.floor(eligibleDays / 10);
+          grants.push({
+            code:'G_PERSONAL', title:'מענק הוצאות אישיות מוגדל',
+            amount: chunks * per10.personal,
+            amountStr: `${chunks * per10.personal} ₪`,
+            note: `${chunks} מנות × ${per10.personal} ₪ (מיום 30 והלאה, מערך ${this.unitArrayLabel()})`
+          });
+          if (c.hasChildUnder14) {
+            grants.push({
+              code:'G_FAMILY', title:'מענק משפחה מוגדל',
+              amount: chunks * per10.family,
+              amountStr: `${chunks * per10.family} ₪`,
+              note: `עם ילד עד 14 — ${chunks} מנות × ${per10.family} ₪`
+            });
+          }
+        }
+        if (days >= 60) {
+          const lumps = {
+            combat: c.hasChildUnder14 ? 4500 : 3500,
+            hagmar: c.hasChildUnder14 ? 1350 : 1050,
+            other:  c.hasChildUnder14 ? 1350 : 1050,
+          }[arr];
+          grants.push({
+            code:'G_THRESHOLD_60', title:'מענק סף 60 ימים',
+            amount: lumps, amountStr: `${lumps} ₪`,
+            note: `≥ 60 ימי צו 8 ב${this.unitArrayLabel()}${c.hasChildUnder14 ? ' + ילד עד 14' : ''}`
+          });
+        }
+        if (days >= 120 && arr === 'combat' && c.hasPartner) {
+          grants.push({
+            code:'G_PARTNER_COMBAT', title:'מענק בן/בת זוג של לוחם (≥120 ימים)',
+            amount: 4500, amountStr: '4,500 ₪',
+            note: 'מוגש דרך מרכז המילואים 360 / קרן הסיוע'
+          });
+        }
+        if (days >= 45 && c.hasSpecialNeedsChild) {
+          grants.push({
+            code:'G_SPECIAL_NEEDS', title:'מענק משפחה מיוחדת',
+            amount: 2000, amountStr: '2,000 ₪',
+            note: 'ילד עם צרכים מיוחדים / זכאי גמלת ילד נכה'
+          });
+        }
+        if (days >= 32 && arr === 'combat') {
+          const specialDays = Math.min(days - 31, Math.max(0, days - 60)) > 0 ?
+            (days - 60) + 29 : Math.max(0, days - 31);
+          if (specialDays > 0) {
+            grants.push({
+              code:'G_SPECIAL_COMP', title:'התגמול המיוחד',
+              amount: specialDays * 133, amountStr: `${specialDays * 133} ₪`,
+              note: `${specialDays} ימים × 133 ₪ (מערך לוחם). צפוי לתשלום ב־1.5.2026.`
+            });
+          }
+        }
+
+        const grantsTotal = grants.reduce((s,g) => s + g.amount, 0);
+
+        // Citations
+        const citations = [
+          { section: '§271', title: 'כלל 7 הימים והכפלת ×1.4', url: 'https://www.nevo.co.il/law_html/law01/039_112.htm' },
+          { section: '§272', title: 'שיעור התגמול ליום', url: 'https://www.nevo.co.il/law_html/law01/039_112.htm' },
+          { section: '§273', title: 'שכר רגיל / הכנסה ממוצעת', url: 'https://www.nevo.co.il/law_html/law01/039_112.htm' },
+        ];
+        if (this.needsSelfEmployedIncome) {
+          citations.push({ section: 'FAQ BTL', title: 'חישוב לעצמאי בתקופת חרבות ברזל', url: 'https://www.btl.gov.il/About/faq/HarvotBarzelOuestions/MiloeimQ/AzmeimMiloeim/Pages/HisovTAGMOL.aspx' });
+        }
+        if (grants.length > 0) {
+          citations.push({ section: 'החלטה 2540', title: 'מדיניות המילואים 2025', url: 'https://api.miluim.idf.il/api/v1/Media/4amltdo5/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A9%D7%A0%D7%AA-2025.pdf' });
+        }
+
+        this.results = {
+          expected, paidTotal, gap,
+          paidDays, dailyRate: daily, rawDaily, quarterSum,
+          ruleUsed, clampedBy,
+          flags, grants, grantsTotal, citations,
+        };
+      },
+
+      // ---------- Output helpers ----------
+      fmtIls(n) {
+        if (!n && n !== 0) return '—';
+        return '₪ ' + Math.round(n).toLocaleString('he-IL');
+      },
+
+      downloadJson() {
+        const payload = { input: this.input, results: this.results, generatedAt: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `miluim-report-${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+    }));
+  });
+
+  function defaultResults() {
+    return {
+      expected: 0, paidTotal: 0, gap: 0,
+      paidDays: 0, dailyRate: 0, rawDaily: 0, quarterSum: 0,
+      ruleUsed: '—', clampedBy: 'none',
+      flags: [], grants: [], grantsTotal: 0, citations: [],
+    };
+  }
+</script>
+
+<!-- Alpine.js (deferred so our init fires first) -->
+<script defer src="https://unpkg.com/@alpinejs/collapse@3.14.1/dist/cdn.min.js"></script>
+<script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+</body>
+</html>
